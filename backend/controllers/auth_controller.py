@@ -18,12 +18,21 @@ def verify_password(hash_: str, password: str) -> bool:
 
 
 def generate_token(user: User) -> str:
+    # PyJWT 2.x validates that the subject (sub) is a string; store user.id as str
     payload = {
-        "sub": user.id,
+        "sub": str(user.id),
         "role": user.role,
         "exp": datetime.utcnow() + timedelta(hours=8),
     }
-    return jwt.encode(payload, current_app.config["SECRET_KEY"], algorithm=current_app.config["JWT_ALGORITHM"])
+    token = jwt.encode(
+        payload,
+        current_app.config["SECRET_KEY"],
+        algorithm=current_app.config["JWT_ALGORITHM"],
+    )
+    # PyJWT >= 2 returns a str, but older versions return bytes; normalize to str
+    if isinstance(token, bytes):
+        token = token.decode("utf-8")
+    return token
 
 
 def decode_token(token: str):
@@ -43,7 +52,13 @@ def token_required(roles=None):
             token = auth_header.split(" ", 1)[1]
             try:
                 payload = decode_token(token)
-                user = User.query.get(payload.get("sub"))
+                user_id = payload.get("sub")
+                try:
+                    user_id = int(user_id)
+                except (TypeError, ValueError):
+                    return jsonify({"message": "Invalid token"}), 401
+
+                user = User.query.get(user_id)
                 if not user:
                     return jsonify({"message": "User not found"}), 401
                 if roles and user.role not in roles:

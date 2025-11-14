@@ -6,15 +6,15 @@ export const apiClient = axios.create({
   baseURL: '/api',
 })
 
+// Hook that returns the shared client and wires the latest JWT token
 export function useApi() {
   const { token } = useAuth()
 
-  apiClient.interceptors.request.use((config) => {
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  })
+  if (token) {
+    apiClient.defaults.headers.common.Authorization = `Bearer ${token}`
+  } else {
+    delete apiClient.defaults.headers.common.Authorization
+  }
 
   return apiClient
 }
