@@ -13,4 +13,9 @@ def create_db():
 
 
 if __name__ == "__main__":
+    print("\n=== Registered Routes ===")
+    for rule in app.url_map.iter_rules():
+        print(rule)
+    print("=========================\n")
+
     app.run(debug=True)
