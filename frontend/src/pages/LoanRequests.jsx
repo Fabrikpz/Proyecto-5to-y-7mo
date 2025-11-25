@@ -38,6 +38,24 @@ export default function LoanRequests() {
     loadUsersAndEquipments()
   }, [api])
 
+  const handleApprove = async (loanId) => {
+    try {
+      await api.post(`/loans/${loanId}/approve`)
+      setLoans((prev) => prev.map((l) => (l.id === loanId ? { ...l, status: 'active' } : l)))
+    } catch (err) {
+      console.error('Failed to approve loan', err)
+    }
+  }
+
+  const handleReject = async (loanId) => {
+    try {
+      await api.post(`/loans/${loanId}/reject`)
+      setLoans((prev) => prev.map((l) => (l.id === loanId ? { ...l, status: 'rejected' } : l)))
+    } catch (err) {
+      console.error('Failed to reject loan', err)
+    }
+  }
+
   const handleClose = async (loanId) => {
     try {
       await api.post(`/loans/${loanId}/close`)
@@ -79,61 +97,81 @@ export default function LoanRequests() {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)]">
         <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Loan ID</th>
-              <th className="px-4 py-3">User</th>
-              <th className="px-4 py-3">Equipment</th>
-              <th className="px-4 py-3">Loan date</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loans.map((loan) => (
-              <tr key={loan.id} className="border-t border-slate-100">
-                <td className="px-4 py-3 text-slate-700">#{loan.id}</td>
-                <td className="px-4 py-3 text-slate-600">
-                  {loan.user_name ? `${loan.user_name} (#${loan.user_id})` : loan.user_id}
-                </td>
-                <td className="px-4 py-3 text-slate-600">
-                  {loan.equipment_name ? `${loan.equipment_name} (#${loan.equipment_id})` : loan.equipment_id}
-                </td>
-                <td className="px-4 py-3 text-slate-600">
-                  {loan.loan_date ? new Date(loan.loan_date).toLocaleString() : '-'}
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      loan.status === 'active'
-                        ? 'bg-amber-50 text-amber-700'
-                        : 'bg-emerald-50 text-emerald-700'
-                    }`}
-                  >
-                    {loan.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  {loan.status === 'active' && (
-                    <button
-                      onClick={() => handleClose(loan.id)}
-                      className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-                    >
-                      Mark returned
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {loans.length === 0 && (
+            <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <td className="px-4 py-4 text-sm text-slate-500" colSpan={6}>
-                  No loans found.
-                </td>
+                <th className="px-4 py-3">Loan ID</th>
+                <th className="px-4 py-3">User</th>
+                <th className="px-4 py-3">Equipment</th>
+                <th className="px-4 py-3">Loan date</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loans.map((loan) => (
+                <tr key={loan.id} className="border-t border-slate-100">
+                  <td className="px-4 py-3 text-slate-700">#{loan.id}</td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {loan.user_name ? `${loan.user_name} (#${loan.user_id})` : loan.user_id}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {loan.equipment_name ? `${loan.equipment_name} (#${loan.equipment_id})` : loan.equipment_id}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">
+                    {loan.loan_date ? new Date(loan.loan_date).toLocaleString() : '-'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        loan.status === 'pending'
+                          ? 'bg-amber-50 text-amber-700'
+                          : loan.status === 'active'
+                          ? 'bg-blue-50 text-blue-700'
+                          : loan.status === 'returned'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      {loan.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right space-x-2">
+                    {loan.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => handleApprove(loan.id)}
+                          className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleReject(loan.id)}
+                          className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    {loan.status === 'active' && (
+                      <button
+                        onClick={() => handleClose(loan.id)}
+                        className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                      >
+                        Mark returned
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {loans.length === 0 && (
+                <tr>
+                  <td className="px-4 py-4 text-sm text-slate-500" colSpan={6}>
+                    No loans found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-900 mb-3">Create loan</h2>

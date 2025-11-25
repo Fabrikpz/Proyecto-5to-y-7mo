@@ -10,7 +10,8 @@ class Loan(db.Model):
     equipment_id = db.Column(db.Integer, db.ForeignKey("equipments.id"), nullable=False)
     loan_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     return_date = db.Column(db.DateTime, nullable=True)
-    status = db.Column(db.String(30), nullable=False, default="active")  # active, returned, cancelled
+    # pending -> active (approved) -> returned / rejected / cancelled
+    status = db.Column(db.String(30), nullable=False, default="pending")
 
     user = db.relationship("User", back_populates="loans")
     equipment = db.relationship("Equipment", back_populates="loans")

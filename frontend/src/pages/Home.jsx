@@ -19,10 +19,10 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
               <Link
-                to="/dashboard"
+                to={user.role === 'admin' ? '/dashboard' : '/equipments'}
                 className="inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
               >
-                Go to dashboard
+                Go to {user.role === 'admin' ? 'dashboard' : 'equipments'}
               </Link>
             ) : (
               <>

@@ -2,7 +2,7 @@ from backend import db
 from backend.models import Equipment
 
 
-VALID_STATUSES = {"available", "loaned", "under_maintenance"}
+VALID_STATUSES = {"available", "loaned", "under_maintenance", "pending"}
 
 
 def list_equipments(status: str | None = None):

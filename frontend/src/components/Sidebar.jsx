@@ -13,14 +13,16 @@ export default function Sidebar() {
   return (
     <aside className="hidden w-56 border-r border-slate-200 bg-white p-4 md:block">
       <nav className="space-y-1">
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) =>
-            `${linkBase} ${isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-700'}`
-          }
-        >
-          Dashboard
-        </NavLink>
+        {user.role === 'admin' && (
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              `${linkBase} ${isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-700'}`
+            }
+          >
+            Dashboard
+          </NavLink>
+        )}
         <NavLink
           to="/equipments"
           className={({ isActive }) =>
@@ -29,6 +31,16 @@ export default function Sidebar() {
         >
           Equipments
         </NavLink>
+        {(user.role === 'teacher' || user.role === 'student') && (
+          <NavLink
+            to="/historial"
+            className={({ isActive }) =>
+              `${linkBase} ${isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-700'}`
+            }
+          >
+            Historial
+          </NavLink>
+        )}
         {user.role === 'admin' && (
           <NavLink
             to="/users"
@@ -39,7 +51,7 @@ export default function Sidebar() {
             Users
           </NavLink>
         )}
-        {(user.role === 'admin' || user.role === 'teacher') && (
+        {user.role === 'admin' && (
           <NavLink
             to="/loans"
             className={({ isActive }) =>

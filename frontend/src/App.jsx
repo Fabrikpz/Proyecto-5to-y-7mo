@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import EquipmentList from './pages/EquipmentList'
 import LoanRequests from './pages/LoanRequests'
+import LoanHistory from './pages/LoanHistory'
 import Users from './pages/Users'
 import Layout from './components/Layout'
 import { useAuth } from './context/AuthContext'
@@ -17,7 +18,8 @@ function PrivateRoute({ children, roles }) {
   }
 
   if (roles && roles.length > 0 && !roles.includes(user.role)) {
-    return <Navigate to="/" replace />
+    // Non-admin users should be redirected away from restricted routes to equipments.
+    return <Navigate to="/equipments" replace />
   }
 
   return children
@@ -32,7 +34,7 @@ export default function App() {
       <Route
         path="/dashboard"
         element={
-          <PrivateRoute roles={["admin", "teacher", "student"]}>
+          <PrivateRoute roles={["admin"]}>
             <Layout>
               <Dashboard />
             </Layout>
@@ -54,9 +56,20 @@ export default function App() {
       <Route
         path="/loans"
         element={
-          <PrivateRoute roles={["admin", "teacher"]}>
+          <PrivateRoute roles={["admin"]}>
             <Layout>
               <LoanRequests />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/historial"
+        element={
+          <PrivateRoute roles={["teacher", "student"]}>
+            <Layout>
+              <LoanHistory />
             </Layout>
           </PrivateRoute>
         }
